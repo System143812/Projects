@@ -2,63 +2,106 @@ const canvas = document.getElementById('gabCanvas');
 const ctx = canvas.getContext("2d");
 
 const sprite = new Image();
+const runSprite = new Image();
+const bgImage = new Image();
+runSprite.src = "../assets/sprites/run.png";
 sprite.src = "../assets/sprites/idle.png";
-const canvasWidth = 300;
-const canvasHeight = 200;
+bgImage.src = "../assets/sprites/terrain/terrain.png";
+const canvasWidth = 500;
+const canvasHeight = 250;
 let x = canvasWidth / 2;
 let y = canvasHeight / 2;
-const moveSize = 5;
-const spriteWidth = 35;
-const spriteHeight = 45;
+const moveSize = 4;
+const spriteWidth = 45;
+const spriteHeight = 55; 
 canvas.width = canvasWidth;
 canvas.height = canvasHeight;
 
-const idle1x = [10, 75];
-let currentIdle = 0;
-let currentIdle1x = idle1x[currentIdle];
-const idle1y = 140;
-
+let is_moving = 0;
+let lastDirection = "down";
+let animationX = [[10, 75], [10, 75, 140, 205, 270, 335, 400, 460]];
+let currentFrame = 0;
+let currentAction;
+let animationFrame = animationX[is_moving][currentFrame];
+let animationY = 140;
+let running = false;
 let frameTime = 0;
 const frameDelay = 20;
 
 canvas.style.border = "solid red 1px";
 
-document.addEventListener('keydown', function(e){
-  is_moving = true;
+function pressKey(e){
+  console.log("is moving");
   if((e.key === "ArrowRight" || e.key === "d") && x <= (canvasWidth - moveSize - spriteWidth)){
     x += moveSize;
-    
+    is_moving = 1;
+    if(animationY !== 203){
+      currentFrame = 0;
+    }
+    animationY = 203;
+    running = true;
+    return running;
   }
   if((e.key === "ArrowLeft" || e.key === "a") && x >= (0 + moveSize)){
     x -= moveSize;
-    
+    is_moving = 1;
+    if (animationY !== 75) {
+      currentFrame = 0;
+    }
+    animationY = 75;
+    running = true;
+    return running;
   }
   if((e.key === "ArrowDown" || e.key === "s") && y <= (canvasHeight - moveSize - spriteHeight)){
     y += moveSize;
+    is_moving = 1;
+    if (animationY !== 140) {
+      currentFrame = 0;
+    }
+    animationY = 140;
+    running = true;
+    return running;
   }
   if((e.key === "ArrowUp" || e.key === "w") && y >= (0 + moveSize)){
     y -= moveSize;
+    is_moving = 1;
+    if (animationY !== 10) {
+      currentFrame = 0;
+    }
+    animationY = 10;
+    running = true;
+    return running;
   }
-});
+  running = false;
+  return running;
+}
 
-is_moving = false;
+document.addEventListener('keydown', pressKey);
 
 function drawAnimate(){
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    ctx.drawImage(sprite, currentIdle1x, idle1y, 45, 55, x, y, spriteWidth, spriteHeight);
-    frameTime++;
-    if(frameTime >= frameDelay){
-      if(currentIdle < idle1x.length -1){
-        currentIdle ++;
-      }
-      else{
-        currentIdle = 0;
-      }
-      currentIdle1x = idle1x[currentIdle];
-      frameTime = 0;
+  //iloloop neto yung buong animaton frame ng sprite's through x
+  is_moving = running ? 1 : 0;
+  animationFrame = animationX[is_moving][currentFrame];
+  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+  ctx.drawImage(bgImage, 0, 0, 600, 600);
+  if(is_moving === 1){
+   ctx.drawImage(runSprite, animationFrame, animationY, 45, 55, x, y, spriteWidth, spriteHeight); 
+  }
+  else if(is_moving === 0){
+    ctx.drawImage(sprite, animationFrame, animationY, 45, 55, x, y, spriteWidth, spriteHeight);  
+  }
+  frameTime ++;
+  if(frameTime >= frameDelay){
+    if(currentFrame >= animationX[is_moving].length -1){
+      currentFrame = 0;
     }
-    requestAnimationFrame(drawAnimate);
-    
+    else if(currentFrame < animationX[is_moving].length -1){
+      currentFrame ++;
+    }
+    frameTime = 0;
+    console.log("not moving");
+  }
+  requestAnimationFrame(drawAnimate);
 }
 
 sprite.onload = drawAnimate;
