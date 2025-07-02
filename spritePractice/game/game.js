@@ -7,11 +7,11 @@ const bgImage = new Image();
 runSprite.src = "../assets/sprites/run.png";
 sprite.src = "../assets/sprites/idle.png";
 bgImage.src = "../assets/sprites/terrain/terrain.png";
-const canvasWidth = 500;
-const canvasHeight = 250;
+const canvasWidth = window.innerWidth;
+const canvasHeight = window.innerHeight;
 let x = canvasWidth / 2;
 let y = canvasHeight / 2;
-const moveSize = 4;
+const moveSize = 2;
 const spriteWidth = 45;
 const spriteHeight = 55; 
 canvas.width = canvasWidth;
@@ -27,54 +27,63 @@ let currentAction;
 let animationFrame = animationX[is_moving][currentFrame];
 let animationY = 140;
 let frameTime = 0;
-const frameDelay = 12;
+const frameDelay = 6;
 
 canvas.style.border = "solid red 1px";
 
-function run(){
+// function run(){
   
-}
+// }
 
-function idle(){
+// function idle(){
   
-}
-
+// }
+const keyPressed = {};
 function pressKey(e){
-  console.log("is moving");
-  if((e.key === "ArrowRight" || e.key === "d") && x <= (canvasWidth - moveSize - spriteWidth)){
+  keyPressed[e.key] = true;
+
+}
+
+function releaseKey(e){
+  keyPressed[e.key] = false;
+  is_moving = 0; 
+}
+
+function updateMovement(){
+  if((keyPressed["ArrowRight"] || keyPressed["d"]) && x <= (canvasWidth - moveSize - spriteWidth)){
     x += moveSize;
-    is_moving = 1;
     action = 1;
+    is_moving = 1;
     if(action !== recentAction){
       recentAction = 1;
       currentFrame = 0;
     }
     animationY = 203;
   }
-  if((e.key === "ArrowLeft" || e.key === "a") && x >= (0 + moveSize)){
+  else if((keyPressed["ArrowLeft"] || keyPressed["a"]) && x >= (0 + moveSize)){
     x -= moveSize;
-    is_moving = 1;
     action = 1;
+    is_moving = 1;
     if (action !== recentAction) {
       recentAction = 1;
       currentFrame = 0;
     }
     animationY = 75;
   }
-  if((e.key === "ArrowDown" || e.key === "s") && y <= (canvasHeight - moveSize - spriteHeight)){
+  else if((keyPressed["ArrowDown"] || keyPressed["s"]) && y <= (canvasHeight - moveSize - spriteHeight)){
     y += moveSize;
-    is_moving = 1;
     action = 1;
+    is_moving = 1;
     if (action !== recentAction) {
       recentAction = 1;
       currentFrame = 0;
     }
     animationY = 140;
   }
-  if((e.key === "ArrowUp" || e.key === "w") && y >= (0 + moveSize)){
+  else if((keyPressed["ArrowUp"] || keyPressed["w"]) && y >= (0 + moveSize)){
     y -= moveSize;
-    is_moving = 1;
     action = 1;
+    is_moving = 1;
     if (action !== recentAction) {
       recentAction = 1;
       currentFrame = 0;
@@ -85,8 +94,10 @@ function pressKey(e){
 }
 
 document.addEventListener('keydown', pressKey);
+document.addEventListener('keyup', releaseKey);
 
 function drawAnimate(){
+  updateMovement();
   //iloloop neto yung buong animaton frame ng sprite's through x
   if(is_moving === 0 && recentAction === 1){
     action = 0;
@@ -95,7 +106,7 @@ function drawAnimate(){
   }
   animationFrame = animationX[is_moving][currentFrame];
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-  ctx.drawImage(bgImage, 0, 0, 600, 600);
+  ctx.drawImage(bgImage, 0, 0, 800, 800);
   if(is_moving === 1){
    ctx.drawImage(runSprite, animationFrame, animationY, 45, 55, x, y, spriteWidth, spriteHeight); 
   }
@@ -110,9 +121,7 @@ function drawAnimate(){
     else if(currentFrame < animationX[is_moving].length -1){
       currentFrame ++;
     }
-    is_moving = 0;
     frameTime = 0;
-    console.log("not moving");
   }
   requestAnimationFrame(drawAnimate);
 }
